@@ -1,11 +1,18 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-DATABASE_URL = "sqlite:///./backend/app.db"
+# MariaDB Configuration (compatible dengan MySQL driver)
+# Format: mysql+pymysql://username:password@host:port/database
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "mysql+pymysql://root:123@localhost:3306/skolarin"
+)
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    pool_pre_ping=True,
+    pool_recycle=3600,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

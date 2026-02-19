@@ -59,7 +59,10 @@ export default function SignupPage() {
       if (!token) throw new Error("Token tidak ditemukan")
 
       window.localStorage.setItem("skolarin_auth_token", token)
-      router.push("/quiz_play")
+      // Set cookie for middleware access
+      document.cookie = `skolarin_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
+      router.push("/select_avatar")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Daftar gagal")
     } finally {

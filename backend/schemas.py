@@ -13,6 +13,13 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     username: str | None = None
+    avatar_url: str | None = None
+    coins: int = 200
+
+
+class UpdateAvatarRequest(BaseModel):
+    avatar_url: str
+    username: str | None = None
 
 
 class LoginRequest(BaseModel):

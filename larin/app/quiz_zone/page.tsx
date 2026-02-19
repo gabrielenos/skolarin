@@ -1,9 +1,12 @@
 "use client"
 
-import { useLayoutEffect, useState } from "react"
-import Image from "next/image"
+import { useLayoutEffect, useMemo, useState } from "react"
+import NextImage from "next/image"
 import { useRouter } from "next/navigation"
+import { Settings, Trophy } from "lucide-react"
 import Logo from "@/components/logo"
+import ProfileBar from "@/components/profile-bar"
+import SettingsMenu from "@/components/settings-menu"
 
 export default function QuizZonePage() {
   const router = useRouter()
@@ -62,77 +65,48 @@ export default function QuizZonePage() {
 
           {/* Tombol setting */}
           <div className="relative z-50">
-            <button
-              type="button"
-              aria-label="Settings"
-              onClick={() => setIsSettingsOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/70 bg-sky-500/30 text-white hover:bg-sky-500/60 transition-colors"
-            >
-              <span className="text-lg font-semibold">⚙️</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Trophy"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Trophy className="h-5 w-5" />
+              </button>
 
-            {isSettingsOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-40 rounded-xl border border-sky-100 bg-white py-1 text-sm text-slate-800 shadow-lg">
-                <button
-                  type="button"
-                  className="flex w-full items-center px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsSettingsOpen(false)
-                    router.push("/dashboard/contact")
-                  }}
-                >
-                  Contact
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsDarkMode((prev) => {
-                      const next = !prev
-                      window.localStorage.setItem("skolarin-theme", next ? "dark" : "light")
-                      window.dispatchEvent(new Event("skolarin-theme-change"))
-                      return next
-                    })
-                  }}
-                >
-                  <span>Mode dark</span>
-                  <span
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      isDarkMode ? "bg-sky-500" : "bg-slate-300"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                        isDarkMode ? "translate-x-4" : "translate-x-0.5"
-                      }`}
-                    />
-                  </span>
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                aria-label="Settings"
+                onClick={() => setIsSettingsOpen((prev) => !prev)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+
+            {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
           </div>
         </div>
       </nav>
 
+      <ProfileBar isDarkMode={isDarkMode} />
+
       {/* Konten utama Quiz Zone */}
       <main className="flex-1 mx-auto w-full max-w-[1363px] px-4 pt-10 pb-16 sm:px-6 lg:px-8">
         <header className="text-center space-y-2 mb-10">
-          <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
-            isDarkMode ? "text-white" : "text-slate-900"
-          }`}>
+          <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${isDarkMode ? "text-white" : "text-slate-900"
+            }`}>
             Quiz Play
           </h1>
           <p
-            className={`text-sm sm:text-base font-semibold ${
-              isDarkMode ? "text-slate-100" : "text-slate-700"
-            }`}
+            className={`text-sm sm:text-base font-semibold ${isDarkMode ? "text-slate-100" : "text-slate-700"
+              }`}
           >
             Home | Quiz Play | Quiz Zone
           </p>
           <p
-            className={`mt-6 text-sm sm:text-base font-semibold ${
-              isDarkMode ? "text-slate-100" : "text-slate-800"
-            }`}
+            className={`mt-6 text-sm sm:text-base font-semibold ${isDarkMode ? "text-slate-100" : "text-slate-800"
+              }`}
           >
             Categories
           </p>
@@ -220,7 +194,7 @@ function ZoneCard({ title, subtitle, questions }: ZoneCardProps) {
       <div className="mr-4 flex-shrink-0 flex items-center md:block">
         {/* Mobile & desktop: ikon kategori utama (buku) */}
         <div className="relative h-[60px] w-[60px] md:h-[81px] md:w-[81px]">
-          <Image src="/images/book.png" alt="Category icon" fill className="object-contain" />
+          <NextImage src="/images/book.png" alt="Category icon" fill className="object-contain" />
         </div>
 
         {/* Desktop: Questions + bell di bawah buku */}
@@ -228,7 +202,7 @@ function ZoneCard({ title, subtitle, questions }: ZoneCardProps) {
           <p className="text-xs text-sky-100/90 whitespace-nowrap">{questions}</p>
           <div className="h-[32px] w-[32px] rounded-full bg-[#FFC727] flex items-center justify-center">
             <div className="relative h-[28px] w-[28px]">
-              <Image src="/images/bell.png" alt="Notification icon" fill className="object-contain" />
+              <NextImage src="/images/bell.png" alt="Notification icon" fill className="object-contain" />
             </div>
           </div>
         </div>
@@ -250,7 +224,7 @@ function ZoneCard({ title, subtitle, questions }: ZoneCardProps) {
         <div className="flex flex-col items-end gap-1">
           <div className="h-[32px] w-[32px] rounded-full bg-[#FFC727] flex items-center justify-center">
             <div className="relative h-[28px] w-[28px]">
-              <Image src="/images/bell.png" alt="Notification icon" fill className="object-contain" />
+              <NextImage src="/images/bell.png" alt="Notification icon" fill className="object-contain" />
             </div>
           </div>
           <p className="text-xs text-sky-100/90 whitespace-nowrap text-right">{questions}</p>

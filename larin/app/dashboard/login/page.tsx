@@ -40,6 +40,9 @@ export default function LoginPage() {
       if (!token) throw new Error("Token tidak ditemukan")
 
       window.localStorage.setItem("skolarin_auth_token", token)
+      // Set cookie for middleware access
+      document.cookie = `skolarin_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
       router.push("/quiz_play")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login gagal")

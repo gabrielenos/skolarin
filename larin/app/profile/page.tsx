@@ -1,10 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
+  BarChart3,
   Bell,
   Bookmark,
+  Coins,
   Gift,
   Globe,
   HelpCircle,
@@ -13,147 +16,201 @@ import {
   Share2,
   Star,
   Trash2,
-  TrendingUp,
   UserPlus,
   Wallet,
 } from "lucide-react"
 
+interface User {
+  id: number
+  email: string
+  username: string | null
+  avatar_url: string | null
+}
+
 export default function ProfilePage() {
   const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const menuLeft = [
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = window.localStorage.getItem("skolarin_auth_token")
+      
+      try {
+        const res = await fetch("http://127.0.0.1:8000/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token || ''}`,
+          },
+        })
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            window.localStorage.removeItem("skolarin_auth_token")
+            document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+            router.push("/dashboard/login")
+            return
+          }
+          throw new Error("Failed to fetch user data")
+        }
+
+        const data = await res.json()
+        setUser(data)
+        
+        // Redirect ke select_avatar jika belum pilih avatar
+        if (!data.avatar_url) {
+          router.push("/select_avatar")
+          return
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load user data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUser()
+  }, [router])
+
+  const menuItems = [
     { label: "Bookmark", icon: Bookmark },
-    { label: "Lencana", icon: Star },
-    { label: "Statistik", icon: TrendingUp },
-    { label: "Cara Bermain", icon: HelpCircle },
-    { label: "Nilai Kami", icon: Star },
-    { label: "Hapus Akun", icon: Trash2 },
+    { label: "Invite Friends", icon: UserPlus },
+    { label: "Badges", icon: Star },
+    { label: "Rewards", icon: Gift },
+    { label: "Language", icon: Globe },
+    { label: "How to Play", icon: HelpCircle },
+    { label: "App Settings", icon: Share2 },
+    { label: "Rate Us", icon: Star },
   ] as const
 
-  const menuRight = [
-    { label: "Undang Teman", icon: UserPlus },
-    { label: "Hadiah", icon: Gift },
-    { label: "Bahasa", icon: Globe },
-    { label: "Bagikan Aplikasi", icon: Share2 },
-    { label: "Keluar!", icon: LogOut },
-  ] as const
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
+      </div>
+    )
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-red-500">{error || "User not found"}</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-[#1F7AE0] pb-24">
-        <div className="mx-auto w-full max-w-md px-4 pt-4 md:mx-0 md:max-w-5xl">
-          <div className="relative flex items-center">
+    <div className="min-h-screen bg-slate-100">
+      <div className="bg-[#1F7AE0]">
+        <div className="mx-auto w-full max-w-5xl px-4">
+          <div className="flex h-14 items-center justify-between">
+            <div className="text-sm font-bold tracking-wide text-white">PROFILE</div>
             <button
               type="button"
+              aria-label="Back"
               onClick={() => router.back()}
-              aria-label="Kembali"
-              className="absolute left-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/95 hover:bg-white/10"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1F7AE0]"
             >
-              <ArrowLeft className="h-6 w-6" />
+              <ArrowLeft className="h-5 w-5" />
             </button>
-
           </div>
         </div>
       </div>
 
-      <div className="-mt-12">
-        <div className="mx-auto w-full max-w-md px-4 pb-10 md:mx-55 md:max-w-5xl">
-          <div className="grid gap-6 md:grid-cols-[360px_1fr]">
-            <div>
-              <div className="rounded-3xl bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full bg-slate-200">
-                    <div className="flex h-full w-full items-center justify-center bg-sky-100 text-sky-700">
-                      <span className="text-xl font-semibold">A</span>
-                    </div>
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-lg font-semibold text-slate-900">asep</div>
-                    <div className="truncate text-sm text-slate-400">asep@gmail.com</div>
-                  </div>
-
-                  <button
-                    type="button"
-                    aria-label="Edit profil"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#1F7AE0] text-white shadow-sm hover:bg-[#1968C0]"
-                  >
-                    <Pencil className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white px-3 py-5 shadow-sm"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
-                    <Wallet className="h-5 w-5 text-[#1F7AE0]" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-700">Dompet</div>
-                </button>
-
-                <button
-                  type="button"
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white px-3 py-5 shadow-sm"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
-                    <div className="h-5 w-5 rounded bg-slate-200" />
-                  </div>
-                  <div className="text-center text-sm font-semibold text-slate-700">Riwayat ...</div>
-                </button>
-
-                <button
-                  type="button"
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white px-3 py-5 shadow-sm"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
-                    <Bell className="h-5 w-5 text-[#1F7AE0]" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-700">Notifikasi</div>
-                </button>
-              </div>
+      <div className="mx-auto w-full max-w-5xl px-4 pb-10 pt-8">
+        <div className="rounded-2xl bg-white px-6 py-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="relative h-16 w-16 overflow-hidden rounded-full bg-slate-200">
+              <img
+                src={user.avatar_url || "/images/user.png"}
+                alt="Avatar"
+                className="h-full w-full object-cover"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-3">
-                {menuLeft.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-4 text-left shadow-sm"
-                    >
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                        <Icon className="h-5 w-5 text-[#1F7AE0]" />
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="space-y-3">
-                {menuRight.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-4 text-left shadow-sm"
-                    >
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                        <Icon className="h-5 w-5 text-[#1F7AE0]" />
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-bold text-slate-900">{user.username || "user"}</div>
+              <div className="truncate text-xs text-slate-500">{user.email}</div>
             </div>
+
+            <button
+              type="button"
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#1F7AE0] px-4 text-xs font-bold text-white shadow-sm hover:bg-[#1968C0]"
+            >
+              <Pencil className="h-4 w-4" />
+              EDIT PROFILE
+            </button>
           </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
+              <Wallet className="h-7 w-7 text-[#1F7AE0]" />
+            </div>
+            <div className="mt-4 text-center text-sm font-semibold text-slate-800">Wallet</div>
+          </button>
+
+          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
+              <Coins className="h-7 w-7 text-[#1F7AE0]" />
+            </div>
+            <div className="mt-4 text-center text-sm font-semibold text-slate-800">History</div>
+          </button>
+
+          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
+              <Bell className="h-7 w-7 text-[#1F7AE0]" />
+            </div>
+            <div className="mt-4 text-center text-sm font-semibold text-slate-800">Notifications</div>
+          </button>
+
+          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
+              <BarChart3 className="h-7 w-7 text-[#1F7AE0]" />
+            </div>
+            <div className="mt-4 text-center text-sm font-semibold text-slate-800">Stats</div>
+          </button>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.label}
+                type="button"
+                className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm"
+              >
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+                  <Icon className="h-5 w-5 text-slate-900" />
+                </span>
+                <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+              </button>
+            )
+          })}
+
+          <button
+            type="button"
+            onClick={() => {
+              window.localStorage.removeItem("skolarin_auth_token")
+              document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+              router.push("/dashboard/login")
+            }}
+            className="md:col-span-3 flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm"
+          >
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+              <LogOut className="h-5 w-5 text-slate-900" />
+            </span>
+            <span className="text-sm font-semibold text-slate-900">Log out</span>
+          </button>
+
+          <button type="button" className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+              <Trash2 className="h-5 w-5 text-slate-900" />
+            </span>
+            <span className="text-sm font-semibold text-slate-900">Delete</span>
+          </button>
         </div>
       </div>
     </div>

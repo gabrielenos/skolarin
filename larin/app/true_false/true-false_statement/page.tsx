@@ -1,14 +1,14 @@
 "use client"
 
-import { useLayoutEffect, useMemo, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Settings, Trophy } from "lucide-react"
 import Logo from "@/components/logo"
 import ProfileBar from "@/components/profile-bar"
 import SettingsMenu from "@/components/settings-menu"
-import { useNavigationGuard, markNavigationAsValid } from "@/lib/navigation-guard"
+import { useNavigationGuard } from "@/lib/navigation-guard"
 
-export default function SelfChallengePage() {
+export default function TrueFalseStatementPage() {
   const router = useRouter()
   const isValidAccess = useNavigationGuard()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -17,7 +17,7 @@ export default function SelfChallengePage() {
     return window.localStorage.getItem("skolarin-theme") === "dark"
   })
 
-  const pageBgClass = isDarkMode ? "bg-slate-900" : "bg-[#EEF4FA]"
+  const pageBgClass = isDarkMode ? "bg-slate-900" : "bg-white"
   const navBgClass = "bg-[#29579F]"
 
   useLayoutEffect(() => {
@@ -52,20 +52,10 @@ export default function SelfChallengePage() {
     }
   }, [])
 
-  const categoryOptions = useMemo(() => ["Pilihan Ganda", "Pernyataan Benar-Salah", "Self Challenge"], [])
-  const subCategoryOptions = useMemo(() => ["Bahasa Indonesia", "English", "Matematika"], [])
-  const questionOptions = useMemo(() => [5, 10, 15, 20, 25, 30], [])
-  const durationOptions = useMemo(() => [3, 6, 9, 12, 15, 18, 21, 24, 27, 30], [])
-
-  const [category, setCategory] = useState(categoryOptions[0] ?? "")
-  const [subCategory, setSubCategory] = useState(subCategoryOptions[0] ?? "")
-  const [questionCount, setQuestionCount] = useState<number>(questionOptions[0] ?? 10)
-  const [durationMinutes, setDurationMinutes] = useState<number>(durationOptions[0] ?? 10)
-
   // Block rendering if not valid navigation
   if (!isValidAccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#EEF4FA]">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-slate-500">Loading...</div>
       </div>
     )
@@ -109,65 +99,48 @@ export default function SelfChallengePage() {
 
       <ProfileBar isDarkMode={isDarkMode} />
 
-      <header className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="relative mx-auto flex h-14 max-w-2xl items-center justify-center px-4 md:max-w-4xl md:px-6">
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={() => router.back()}
-            className="absolute left-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
+      {/* Floating Back Button */}
+      <button
+        type="button"
+        aria-label="Back"
+        onClick={() => router.back()}
+        className="fixed top-[120px] left-4 z-50 flex h-14 w-14 items-center justify-center text-slate-700 hover:text-slate-900"
+      >
+        <span className="text-2xl">←</span>
+      </button>
+
+      <main className="flex-1 mx-auto w-full max-w-[1363px] px-4 pt-10 pb-16 sm:px-6 lg:px-8">
+        <header className="text-center space-y-2 mb-10">
+          <h1
+            className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+              isDarkMode ? "text-white" : "text-slate-900"
+            }`}
           >
-            <span className="text-xl">←</span>
-          </button>
-          <h1 className="text-base font-semibold text-slate-900">Tantangan Diri</h1>
-        </div>
-      </header>
-
-      <main className="flex-1 mx-auto w-full max-w-2xl px-4 pb-10 pt-6 md:max-w-4xl md:px-6 md:pt-10 md:pb-16">
-        <div className="space-y-6">
-          <FieldLabel text="Pilih Kategori" />
-          <SelectCard value={category} onChange={setCategory} options={categoryOptions} />
-
-          <FieldLabel text="Pilih Subkategori" />
-          <SelectCard value={subCategory} onChange={setSubCategory} options={subCategoryOptions} />
-
-          <FieldLabel text="Pilih Jumlah Pertanyaan" />
-          <div className="flex gap-3 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
-            {questionOptions.map((n) => (
-              <Chip
-                key={n}
-                text={String(n)}
-                selected={questionCount === n}
-                onClick={() => setQuestionCount(n)}
-              />
-            ))}
-          </div>
-
-          <FieldLabel text="Pilih Durasi Waktu dalam Menit" />
-          <div className="flex gap-3 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
-            {durationOptions.map((n) => (
-              <Chip
-                key={n}
-                text={String(n)}
-                selected={durationMinutes === n}
-                onClick={() => setDurationMinutes(n)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-10">
-          <button
-            type="button"
-            className="h-12 w-full rounded-lg bg-[#0B78E3] text-sm font-semibold text-white shadow-md hover:bg-[#0969C8]"
-            onClick={() => {
-              markNavigationAsValid()
-              router.push(`/self_challenge/quiz?category=${encodeURIComponent(category)}&subcategory=${encodeURIComponent(subCategory)}&count=${questionCount}&duration=${durationMinutes}`)
-            }}
+            Quiz Play
+          </h1>
+          <p
+            className={`text-sm sm:text-base font-semibold ${
+              isDarkMode ? "text-slate-100" : "text-slate-700"
+            }`}
           >
-            MULAI
-          </button>
-        </div>
+            Home | Quiz Play | True &amp; False
+          </p>
+          <p
+            className={`mt-6 text-sm sm:text-base font-semibold ${
+              isDarkMode ? "text-slate-100" : "text-slate-800"
+            }`}
+          >
+            True-False Statement
+          </p>
+        </header>
+
+        <section className="flex flex-col items-center gap-8">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <SubjectCard title="Indonesian language" questions="Pertanyaan: 200" />
+            <SubjectCard title="English" questions="Pertanyaan: 200" />
+            <SubjectCard title="Matematika" questions="Pertanyaan: 200" />
+          </div>
+        </section>
       </main>
 
       <footer className="mt-auto bg-[#29579F] text-white">
@@ -215,62 +188,28 @@ export default function SelfChallengePage() {
   )
 }
 
-function FieldLabel({ text }: { text: string }) {
-  return <p className="text-sm font-medium text-slate-700">{text}</p>
+interface SubjectCardProps {
+  title: string
+  questions: string
 }
 
-function SelectCard({
-  value,
-  onChange,
-  options,
-}: {
-  value: string
-  onChange: (v: string) => void
-  options: string[]
-}) {
+function SubjectCard({ title, questions }: SubjectCardProps) {
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full appearance-none rounded-xl border border-white/60 bg-white px-4 pr-12 text-sm font-medium text-slate-800 shadow-sm outline-none"
-      >
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+    <div className="flex h-[150px] w-[400px] items-center rounded-[12px] border border-black/70 bg-[#1450A3] px-6 py-4 text-left text-white shadow-md">
+      <div className="mr-4 flex flex-col items-center gap-2 flex-shrink-0">
+        <div className="relative h-[81px] w-[81px]">
+          <img src="/images/book.png" alt="Subject icon" className="h-full w-full object-contain" />
+        </div>
+      </div>
 
-      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700">
-          <span className="text-xs">˅</span>
+      <div className="flex flex-col justify-center">
+        <h3 className="font-[Poppins] font-bold text-[20px] leading-[20px] tracking-[-0.01em] whitespace-nowrap mb-2">
+          {title}
+        </h3>
+        <div className="flex items-center text-xs text-sky-100/90">
+          <span>{questions}</span>
         </div>
       </div>
     </div>
-  )
-}
-
-function Chip({
-  text,
-  selected,
-  onClick,
-}: {
-  text: string
-  selected: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`min-w-11 h-11 rounded-lg border px-4 text-sm font-semibold shadow-sm transition-colors ${
-        selected
-          ? "border-[#0B78E3] bg-[#0B78E3] text-white"
-          : "border-white/60 bg-white text-slate-800 hover:bg-slate-50"
-      }`}
-    >
-      {text}
-    </button>
   )
 }

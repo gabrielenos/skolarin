@@ -1,9 +1,13 @@
 "use client"
 
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect, useState, useEffect } from "react"
 import Logo from "@/components/logo"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { Settings, Trophy } from "lucide-react"
+import ProfileBar from "@/components/profile-bar"
+import SettingsMenu from "@/components/settings-menu"
+import { markNavigationAsValid } from "@/lib/navigation-guard"
 
 export default function QuizPlayPage() {
   const router = useRouter()
@@ -12,6 +16,14 @@ export default function QuizPlayPage() {
     if (typeof window === "undefined") return false
     return window.localStorage.getItem("skolarin-theme") === "dark"
   })
+
+  // Security layer: Tolak akses jika tidak ada token di localStorage
+  useEffect(() => {
+    const token = window.localStorage.getItem("skolarin_auth_token")
+    if (!token || token === "undefined" || token === "null") {
+      router.replace("/quiz_language")
+    }
+  }, [router])
 
   const pageBgClass = isDarkMode ? "bg-slate-900" : "bg-white"
   const navBgClass = "bg-[#29579F]"
@@ -62,70 +74,42 @@ export default function QuizPlayPage() {
 
           {/* Tombol setting di sisi kanan */}
           <div className="relative z-50">
-            <button
-              type="button"
-              aria-label="Settings"
-              onClick={() => setIsSettingsOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/70 bg-sky-500/30 text-white hover:bg-sky-500/60 transition-colors"
-            >
-              <span className="text-lg font-semibold">⚙️</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Trophy"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Trophy className="h-5 w-5" />
+              </button>
 
-            {isSettingsOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-40 rounded-xl border border-sky-100 bg-white py-1 text-sm text-slate-800 shadow-lg">
-                <button
-                  type="button"
-                  className="flex w-full items-center px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsSettingsOpen(false)
-                    router.push("/dashboard/contact")
-                  }}
-                >
-                  Contact
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsDarkMode((prev) => {
-                      const next = !prev
-                      window.localStorage.setItem("skolarin-theme", next ? "dark" : "light")
-                      window.dispatchEvent(new Event("skolarin-theme-change"))
-                      return next
-                    })
-                  }}
-                >
-                  <span>Mode dark</span>
-                  <span
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      isDarkMode ? "bg-sky-500" : "bg-slate-300"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                        isDarkMode ? "translate-x-4" : "translate-x-0.5"
-                      }`}
-                    />
-                  </span>
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                aria-label="Settings"
+                onClick={() => setIsSettingsOpen((prev) => !prev)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+
+            {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
           </div>
         </div>
       </nav>
 
+      <ProfileBar isDarkMode={isDarkMode} />
+
       {/* Konten utama Quiz Play */}
       <main className="flex-1 mx-auto w-full max-w-[1363px] px-4 pt-10 pb-16 sm:px-6 lg:px-8">
         <header className="text-center space-y-2 mb-10">
-          <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
-            isDarkMode ? "text-white" : "text-slate-900"
-          }`}>
+          <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${isDarkMode ? "text-white" : "text-slate-900"
+            }`}>
             Quiz Play
           </h1>
           <p
-            className={`text-sm sm:text-base font-semibold ${
-              isDarkMode ? "text-slate-100" : "text-slate-700"
-            }`}
+            className={`text-sm sm:text-base font-semibold ${isDarkMode ? "text-slate-100" : "text-slate-700"
+              }`}
           >
             Home | Quiz Play
           </p>
@@ -138,10 +122,12 @@ export default function QuizPlayPage() {
             <button type="button" onClick={() => router.push("/quiz_zone")} className="focus:outline-none">
               <QuizPlayTextCard title="Quiz Zone" description="Select your favorite zone to play" />
             </button>
-            <QuizPlayTextCard title="Daily Quiz" description="Daily basic new quiz game" />
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/daily_quiz") }} className="focus:outline-none">
+              <QuizPlayTextCard title="Daily Quiz" description="Daily basic new quiz game" />
+            </button>
 
             {/* Baris 2 */}
-            <button type="button" onClick={() => router.push("/true_false")} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/true_false") }} className="focus:outline-none">
               <QuizPlayTextCard title="True & False" description="Choose your answers" />
             </button>
             <button type="button" onClick={() => router.push("/fun_learn")} className="focus:outline-none">
@@ -152,7 +138,7 @@ export default function QuizPlayPage() {
             <button type="button" onClick={() => router.push("/guess_the_word")} className="focus:outline-none">
               <QuizPlayTextCard title="Guest The Word" description="Fun vocabulary game" />
             </button>
-            <button type="button" onClick={() => router.push("/self_challenge")} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/self_challenge") }} className="focus:outline-none">
               <QuizPlayTextCard title="Self Challenge" description="Challenge Yourself" />
             </button>
 
@@ -201,15 +187,17 @@ export default function QuizPlayPage() {
 
           {/* Baris kedua: 3 kartu sejajar dengan gambar maskot */}
           <div className="grid gap-8 sm:grid-cols-3">
-            <QuizPlayCard
-              imageSrc="/images/daily_quiz.png" 
-              imageAlt="Daily Quiz"
-              title="Daily Quiz"
-              description="Daily basic new quiz game"
-            />
-            <button type="button" onClick={() => router.push("/true_false")} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/daily_quiz") }} className="focus:outline-none">
               <QuizPlayCard
-                imageSrc="/images/true.png" 
+                imageSrc="/images/daily_quiz.png"
+                imageAlt="Daily Quiz"
+                title="Daily Quiz"
+                description="Daily basic new quiz game"
+              />
+            </button>
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/true_false") }} className="focus:outline-none">
+              <QuizPlayCard
+                imageSrc="/images/true.png"
                 imageAlt="True & False"
                 title="True & False"
                 description="Choose your answers"
@@ -218,7 +206,7 @@ export default function QuizPlayPage() {
             </button>
             <button type="button" onClick={() => router.push("/fun_learn")} className="focus:outline-none">
               <QuizPlayCard
-                imageSrc="/images/fun_learn.png" 
+                imageSrc="/images/fun_learn.png"
                 imageAlt="Fun & Learn"
                 title="Fun & Learn"
                 description="It's like a comprehension game"
@@ -231,7 +219,7 @@ export default function QuizPlayPage() {
             <button type="button" onClick={() => router.push("/guess_the_word")} className="focus:outline-none">
               <QuizPlayTextCard title="Guess The Word" description="Fun vocabulary game" />
             </button>
-            <button type="button" onClick={() => router.push("/self_challenge")} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/self_challenge") }} className="focus:outline-none">
               <QuizPlayTextCard title="Self Challenge" description="Challenge Yourself" />
             </button>
             <button type="button" onClick={() => router.push("/1vs1_battle")} className="focus:outline-none">
@@ -360,9 +348,8 @@ function QuizPlayCard({ imageSrc, imageAlt, title, description, halfBody = false
 
       {/* Card biru dengan ukuran 231x135 dan radius 43px, border hitam tipis */}
       <div
-        className={`flex h-[135px] w-[231px] flex-col items-center justify-center rounded-[43px] border border-black/70 bg-[#1450A3] px-4 text-white shadow-md ${
-          halfBody ? "-mt-10" : "-mt-8"
-        }`}
+        className={`flex h-[135px] w-[231px] flex-col items-center justify-center rounded-[43px] border border-black/70 bg-[#1450A3] px-4 text-white shadow-md ${halfBody ? "-mt-10" : "-mt-8"
+          }`}
       >
         <h3 className="mb-1 text-base font-semibold">{title}</h3>
         <p className="text-xs leading-snug opacity-95">{description}</p>

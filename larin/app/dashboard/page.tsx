@@ -2,14 +2,24 @@
 
 import { useLayoutEffect, useState, useEffect } from "react"
 import Image from "next/image"
+import { DM_Sans } from "next/font/google"
 import { useRouter } from "next/navigation"
+import { Settings, Trophy } from "lucide-react"
 import Logo from "@/components/logo"
+import ProfileBar from "@/components/profile-bar"
+import SettingsMenu from "@/components/settings-menu"
+import LoadingScreen from "@/components/loading-screen"
 import { Button } from "@/components/ui/button"
+import { markNavigationAsValid } from "@/lib/navigation-guard"
+
+const dmSans = DM_Sans({ subsets: ["latin"] })
 
 export default function DashboardPage() {
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [showLoading, setShowLoading] = useState(true)
+  const [isReady, setIsReady] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window === "undefined") return false
     return window.localStorage.getItem("skolarin-theme") === "dark"
@@ -20,9 +30,12 @@ export default function DashboardPage() {
     // Check if user is logged in (using new token key to ensure clean state)
     const token = window.localStorage.getItem("skolarin_auth_token");
 
-    if (!token) {
+    if (!token || token === "undefined" || token === "null") {
       setIsLoginModalOpen(true)
     } else {
+      // Menyingkronkan cookie lagi sebelum navigasi agar middleware pasti mendeteksi token
+      document.cookie = `skolarin_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+      markNavigationAsValid()
       router.push("/quiz_play")
     }
   }
@@ -41,14 +54,35 @@ export default function DashboardPage() {
       }
     }
 
+    const syncAuth = () => {
+      const token = window.localStorage.getItem("skolarin_auth_token")
+      if (token && token !== "undefined" && token !== "null") {
+        document.cookie = `skolarin_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+      }
+    }
+
+    // Check if should show loading screen (only first visit)
+    const hasVisited = window.localStorage.getItem("skolarin_visited")
+    if (hasVisited) {
+      setShowLoading(false)
+    }
+
+    // Mark as ready after hydration
+    setIsReady(true)
+
     syncTheme()
+    syncAuth()
 
     const onThemeChange = () => syncTheme()
     const onStorage = (e: StorageEvent) => {
       if (e.key === "skolarin-theme") syncTheme()
+      if (e.key === "skolarin_auth_token") syncAuth()
     }
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") syncTheme()
+      if (document.visibilityState === "visible") {
+        syncTheme()
+        syncAuth()
+      }
     }
 
     window.addEventListener("skolarin-theme-change", onThemeChange)
@@ -64,8 +98,28 @@ export default function DashboardPage() {
     }
   }, [])
 
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {showLoading && <LoadingScreen onLoadingComplete={() => {
+          window.localStorage.setItem("skolarin_visited", "true")
+          setShowLoading(false)
+        }} />}
+      </div>
+    )
+  }
+
   return (
-    <div suppressHydrationWarning className={`min-h-screen flex flex-col ${pageBgClass} relative`}>
+    <>
+      {showLoading && (
+        <LoadingScreen 
+          onLoadingComplete={() => {
+            window.localStorage.setItem("skolarin_visited", "true")
+            setShowLoading(false)
+          }} 
+        />
+      )}
+      <div suppressHydrationWarning className={`min-h-screen flex flex-col ${pageBgClass} relative`}>
       {/* Navbar biru */}
       <nav className={`relative z-50 w-full ${navBgClass} text-white shadow-md`}>
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -73,58 +127,36 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center rounded-xl px-3 py-1.5">
               <Logo width={32} height={36} />
             </div>
-            <span className="text-xl font-semibold tracking-wide">Skolarin</span>
+            <span className={`${dmSans.className} text-xl font-semibold tracking-wide`}>Skolarin</span>
           </div>
 
           {/* Tombol setting di sisi kanan */}
           <div className="relative z-50">
-            <button
-              type="button"
-              aria-label="Settings"
-              onClick={() => setIsSettingsOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/70 bg-sky-500/30 text-white hover:bg-sky-500/60 transition-colors"
-            >
-              <span className="text-lg font-semibold">⚙️</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Trophy"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Trophy className="h-5 w-5" />
+              </button>
 
-            {isSettingsOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-40 rounded-xl border border-sky-100 bg-white py-1 text-sm text-slate-800 shadow-lg">
-                <button
-                  type="button"
-                  className="flex w-full items-center px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsSettingsOpen(false)
-                    router.push("/dashboard/contact")
-                  }}
-                >
-                  Contact
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center px-3 py-2 text-left hover:bg-sky-50"
-                  onClick={() => {
-                    setIsSettingsOpen(false)
-                    // Toggle theme logic instead of routing if intended, keeping original behavior for now as user didn't ask to fix this
-                    // But assume user might want login modal here too? No, stick to request.
-                    router.push("/dashboard/login")
-                  }}
-                >
-                  <span>Mode dark</span>
-                  <span
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isDarkMode ? "bg-sky-500" : "bg-slate-300"
-                      }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${isDarkMode ? "translate-x-4" : "translate-x-0.5"
-                        }`}
-                    />
-                  </span>
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                aria-label="Settings"
+                onClick={() => setIsSettingsOpen((prev) => !prev)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0B74E8] text-white shadow-sm hover:bg-[#095FC0] transition-colors"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+
+            {isSettingsOpen && <SettingsMenu onClose={() => setIsSettingsOpen(false)} />}
           </div>
         </div>
       </nav>
+
+      <ProfileBar isDarkMode={isDarkMode} />
 
       {/* Konten utama */}
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 pt-10 pb-24 sm:px-6 lg:px-8">
@@ -160,7 +192,6 @@ export default function DashboardPage() {
           {/* Slot gambar maskot dashboard */}
           <div className="flex items-center justify-center">
             <div className="relative h-72 w-72 sm:h-80 sm:w-80">
-              {/* Ganti src berikut dengan path gambar maskotmu di folder public/, misalnya /images/raccoon.png */}
               <Image
                 src="/images/gambar.png"
                 alt="Dashboard mascot"
@@ -185,7 +216,6 @@ export default function DashboardPage() {
             <div className="relative flex flex-col gap-4 rounded-tl-[5px] rounded-tr-[35px] rounded-br-[5px] rounded-bl-[35px] bg-[#D8E9FF] px-6 pt-20 pb-6">
               {/* Slot gambar 1: besar, keluar setengah dari kotak, agak ke kiri */}
               <div className="absolute left-6 -top-[70px] h-[153px] w-[153px]">
-                {/* Ganti src berikut dengan gambar globe kamu, misalnya /images/why-globe.png */}
                 <Image
                   src="/images/Earth.png"
                   alt="Life Lines icon"
@@ -207,7 +237,6 @@ export default function DashboardPage() {
             <div className="relative flex flex-col gap-4 rounded-tl-[5px] rounded-tr-[35px] rounded-br-[5px] rounded-bl-[35px] bg-[#D8E9FF] px-6 pt-20 pb-6">
               {/* Slot gambar 2: besar, keluar setengah dari kotak, agak ke kiri */}
               <div className="absolute left-6 -top-[70px] h-[153px] w-[153px]">
-                {/* Ganti src berikut dengan gambar leaderboard kamu, misalnya /images/why-leaderboard.png */}
                 <Image
                   src="/images/time.png"
                   alt="Leaderboard icon"
@@ -227,9 +256,7 @@ export default function DashboardPage() {
 
             {/* Card 3 */}
             <div className="relative flex flex-col gap-4 rounded-tl-[5px] rounded-tr-[35px] rounded-br-[5px] rounded-bl-[35px] bg-[#D8E9FF] px-6 pt-20 pb-6">
-              {/* Slot gambar 3: besar, keluar setengah dari kotak, agak ke kiri */}
               <div className="absolute left-6 -top-[70px] h-[153px] w-[153px]">
-                {/* Ganti src berikut dengan gambar dompet kamu, misalnya /images/why-wallet.png */}
                 <Image
                   src="/images/wallet.png"
                   alt="Money Withdrawal icon"
@@ -261,9 +288,7 @@ export default function DashboardPage() {
           <div className="grid gap-8 md:grid-cols-2">
             {/* Feature 1 */}
             <div className="flex items-center gap-4 rounded-3xl bg-[#D8E9FF] px-6 py-5">
-              {/* Slot gambar feature 1 (140 x 140 px) */}
               <div className="relative h-[140px] w-[140px] flex-shrink-0">
-                {/* Ganti src berikut dengan icon buku kamu, misalnya /images/feature-book.png */}
                 <Image
                   src="/images/book.png"
                   alt="Quizzes by category icon"
@@ -282,9 +307,7 @@ export default function DashboardPage() {
 
             {/* Feature 2 */}
             <div className="flex items-center gap-4 rounded-3xl bg-[#D8E9FF] px-6 py-5">
-              {/* Slot gambar feature 2 (140 x 140 px) */}
               <div className="relative h-[140px] w-[140px] flex-shrink-0">
-                {/* Ganti src berikut dengan icon bahasa kamu, misalnya /images/feature-language.png */}
                 <Image
                   src="/images/book2.png"
                   alt="Quizzes by Language icon"
@@ -303,9 +326,7 @@ export default function DashboardPage() {
 
             {/* Feature 3 */}
             <div className="flex items-center gap-4 rounded-3xl bg-[#D8E9FF] px-6 py-5">
-              {/* Slot gambar feature 3 (140 x 140 px) */}
               <div className="relative h-[140px] w-[140px] flex-shrink-0">
-                {/* Ganti src berikut dengan icon battle kamu, misalnya /images/feature-battle.png */}
                 <Image
                   src="/images/glass.png"
                   alt="Battle Quiz icon"
@@ -324,9 +345,7 @@ export default function DashboardPage() {
 
             {/* Feature 4 */}
             <div className="flex items-center gap-4 rounded-3xl bg-[#D8E9FF] px-6 py-5">
-              {/* Slot gambar feature 4 (140 x 140 px) */}
               <div className="relative h-[140px] w-[140px] flex-shrink-0">
-                {/* Ganti src berikut dengan icon guess word kamu, misalnya /images/feature-whale.png */}
                 <Image
                   src="/images/fish.png"
                   alt="Guess The Word icon"
@@ -360,9 +379,7 @@ export default function DashboardPage() {
           <div className="grid gap-10 grid-cols-2 md:grid-cols-4">
             {/* Item 1 */}
             <div className="flex flex-col items-center text-center gap-4">
-              {/* Slot gambar 1 */}
               <div className="relative h-[153px] w-[153px]">
-                {/* Ganti src berikut dengan gambar maskot kamu, misalnya /images/elite-1.png */}
                 <Image
                   src="/images/reguler.png"
                   alt="Regular Updates icon"
@@ -381,9 +398,7 @@ export default function DashboardPage() {
 
             {/* Item 2 */}
             <div className="flex flex-col items-center text-center gap-4">
-              {/* Slot gambar 2 */}
               <div className="relative h-[153px] w-[153px] mt-35">
-                {/* Ganti src berikut dengan gambar maskot kamu, misalnya /images/elite-2.png */}
                 <Image
                   src="/images/fun.png"
                   alt="Global Community icon"
@@ -402,9 +417,7 @@ export default function DashboardPage() {
 
             {/* Item 3 */}
             <div className="flex flex-col items-center text-center gap-4">
-              {/* Slot gambar 3 */}
               <div className="relative h-[153px] w-[153px]">
-                {/* Ganti src berikut dengan gambar maskot kamu, misalnya /images/elite-3.png */}
                 <Image
                   src="/images/community.png"
                   alt="Competitive Fun icon"
@@ -425,7 +438,6 @@ export default function DashboardPage() {
             <div className="flex flex-col items-center text-center gap-4">
               {/* Slot gambar 4 */}
               <div className="relative h-[153px] w-[153px] mt-35">
-                {/* Ganti src berikut dengan gambar maskot kamu, misalnya /images/elite-4.png */}
                 <Image
                   src="/images/Inclusivity.png"
                   alt="All-age Inclusivity icon"
@@ -539,5 +551,6 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+    </>
   )
 }
