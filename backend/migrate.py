@@ -26,5 +26,29 @@ def migrate():
     
     engine.dispose()
 
+
+def drop_settings_table():
+    """Hapus tabel settings yang tidak terpakai"""
+    engine = create_engine(DATABASE_URL)
+    
+    with engine.connect() as conn:
+        # Cek apakah tabel settings ada
+        result = conn.execute(text("""
+            SELECT TABLE_NAME 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_NAME = 'settings'
+        """))
+        
+        if result.fetchone():
+            conn.execute(text("DROP TABLE settings"))
+            conn.commit()
+            print("Tabel 'settings' berhasil dihapus")
+        else:
+            print("Tabel 'settings' sudah tidak ada")
+    
+    engine.dispose()
+
+
 if __name__ == "__main__":
     migrate()
+    drop_settings_table()

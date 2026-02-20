@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import auth as auth_utils
 from database import SessionLocal
 from models import User
+from quiz import CoinHistory
 from schemas import LoginRequest, Token, UserCreate, UserOut, UpdateAvatarRequest
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -60,6 +61,16 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
     
+    # Tambah riwayat koin untuk bonus selamat datang
+    coin_history = CoinHistory(
+        user_id=user.id,
+        title="Bonus Selamat Datang",
+        amount=200,
+        type="income"
+    )
+    db.add(coin_history)
+    db.commit()
+    
     access_token = auth_utils.create_access_token({"sub": str(user.id)})
     return Token(access_token=access_token)
 
@@ -91,3 +102,22 @@ def update_avatar(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.get("/coin-history")
+def get_coin_history(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Mengambil riwayat koin user"""
+    histories = db.query(CoinHistory).filter(
+        CoinHistory.user_id == current_user.id
+    ).order_by(CoinHistory.created_at.desc()).all()
+    
+    return [
+        {
+            "id": h.id,
+            "title": h.title,
+            "amount": h.amount,
+            "type": h.type,
+            "date": h.created_at.strftime("%d %b, %Y")
+        }
+        for h in histories
+    ]

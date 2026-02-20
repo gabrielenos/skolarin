@@ -144,21 +144,21 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+          <button type="button" onClick={() => router.push("/profile/wallet")} className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
               <Wallet className="h-7 w-7 text-[#1F7AE0]" />
             </div>
             <div className="mt-4 text-center text-sm font-semibold text-slate-800">Wallet</div>
           </button>
 
-          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+          <button type="button" onClick={() => router.push("/profile/history")} className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
               <Coins className="h-7 w-7 text-[#1F7AE0]" />
             </div>
             <div className="mt-4 text-center text-sm font-semibold text-slate-800">History</div>
           </button>
 
-          <button type="button" className="rounded-2xl bg-white p-6 shadow-sm">
+          <button type="button" onClick={() => router.push("/profile/notifikasi")} className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
               <Bell className="h-7 w-7 text-[#1F7AE0]" />
             </div>

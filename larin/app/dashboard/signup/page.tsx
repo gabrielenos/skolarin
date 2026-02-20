@@ -23,6 +23,11 @@ export default function SignupPage() {
 
     setError(null)
 
+    if (password.length < 6) {
+      setError("Kata sandi minimal 6 karakter")
+      return
+    }
+
     if (password !== confirmPassword) {
       setError("Konfirmasi kata sandi tidak sama")
       return

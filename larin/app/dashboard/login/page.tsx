@@ -32,8 +32,8 @@ export default function LoginPage() {
 
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        const message = data?.detail || "Login gagal"
-        throw new Error(typeof message === "string" ? message : "Login gagal")
+        const message = data?.detail || "Invalid user"
+        throw new Error(typeof message === "string" ? message : "Invalid user")
       }
 
       const token = data?.access_token
