@@ -1,13 +1,13 @@
 "use client"
 
-import { useLayoutEffect, useMemo, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Settings, Trophy } from "lucide-react"
+import { Settings, Trophy, ChevronRight } from "lucide-react"
 import Logo from "@/components/logo"
 import ProfileBar from "@/components/profile-bar"
 import SettingsMenu from "@/components/settings-menu"
 
-export default function MultiMatchPage() {
+export default function MathematicsPage() {
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -15,8 +15,14 @@ export default function MultiMatchPage() {
     return window.localStorage.getItem("skolarin-theme") === "dark"
   })
 
-  const pageBgClass = isDarkMode ? "bg-slate-900" : "bg-white"
+  const pageBgClass = isDarkMode ? "bg-slate-100" : "bg-[#F0F4F8]"
   const navBgClass = "bg-[#29579F]"
+
+  const matematikaLevels = Array.from({ length: 30 }, (_, i) => ({
+    id: i + 1,
+    title: `Matematika ${i + 1}`,
+    questions: 30,
+  }))
 
   useLayoutEffect(() => {
     const syncTheme = () => {
@@ -88,55 +94,35 @@ export default function MultiMatchPage() {
 
       <ProfileBar isDarkMode={isDarkMode} />
 
-      <main className="flex-1 mx-auto w-full max-w-[1363px] px-4 pt-10 pb-16 sm:px-6 lg:px-8">
-        <header className="text-center space-y-2 mb-10">
-          <h2
-            className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+      <main className="flex-1 mx-auto w-full max-w-[600px] px-4 pt-6 pb-16 sm:px-6">
+        <header className="text-center space-y-2 mb-8">
+          <h1
+            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
               isDarkMode ? "text-white" : "text-slate-900"
             }`}
           >
-            Quiz Play
-          </h2>
+            Mathematics
+          </h1>
           <p
-            className={`text-sm sm:text-base font-semibold ${
-              isDarkMode ? "text-slate-100" : "text-slate-700"
+            className={`text-sm font-semibold ${
+              isDarkMode ? "text-slate-100" : "text-slate-600"
             }`}
           >
-            Home | Quiz Play | Multi Match
-          </p>
-          <p
-            className={`mt-6 text-sm sm:text-base font-semibold ${
-              isDarkMode ? "text-slate-100" : "text-slate-800"
-            }`}
-          >
-            Sub Categories
+            Home | Quiz Play | Math Mania | Mathematics
           </p>
         </header>
 
-        <section className="flex flex-col items-center gap-8">
-          <div className="grid gap-6 lg:grid-cols-3">
+        <section className="grid grid-cols-2 gap-3 max-w-[900px] mx-auto px-4 md:flex md:flex-col md:flex-wrap md:content-center md:max-h-[750px]">
+          {matematikaLevels.map((level) => (
             <button
+              key={level.id}
               type="button"
-              onClick={() => router.push("/multimatch/multimatch_english")}
-              className="focus:outline-none cursor-pointer"
+              onClick={() => router.push(`/math_mania/quiz?level=${level.id}`)}
+              className="focus:outline-none w-full md:w-[280px] lg:w-[320px]"
             >
-              <CategoryCard title="English" subtitle="Sub Category: 30" />
+              <MatematikaCard title={level.title} questions={level.questions} />
             </button>
-            <button
-              type="button"
-              onClick={() => router.push("/multimatch/multimatch_indonesia")}
-              className="focus:outline-none cursor-pointer"
-            >
-              <CategoryCard title="Indonesian Language" subtitle="Sub Category: 30" />
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/multimatch/multimatch_mathematics")}
-              className="focus:outline-none cursor-pointer"
-            >
-              <CategoryCard title="mathematics" subtitle="Sub Category: 30" />
-            </button>
-          </div>
+          ))}
         </section>
       </main>
 
@@ -185,23 +171,19 @@ export default function MultiMatchPage() {
   )
 }
 
-function CategoryCard({ title, subtitle }: { title: string; subtitle: string }) {
+function MatematikaCard({ title, questions }: { title: string; questions: number }) {
   return (
-    <div className="flex h-[150px] w-[400px] items-center rounded-[12px] border border-black/70 bg-[#1450A3] px-6 py-4 text-left text-white shadow-md">
-      <div className="mr-4 flex flex-col items-center gap-2 flex-shrink-0">
-        <div className="relative h-[81px] w-[81px]">
-          <img src="/images/book.png" alt="Category icon" className="h-full w-full object-contain" />
+    <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F0F4F8]">
+          <Logo width={22} height={26} />
+        </div>
+        <div className="flex flex-col">
+          <h3 className="text-base font-bold text-slate-900">{title}</h3>
+          <p className="text-xs text-slate-500">Pertanyaan: {questions}</p>
         </div>
       </div>
-
-      <div className="flex flex-col justify-center">
-        <h3 className="font-[Poppins] font-bold text-[20px] leading-[20px] tracking-[-0.01em] whitespace-nowrap mb-2">
-          {title}
-        </h3>
-        <div className="flex items-center text-xs text-sky-100/90">
-          <span>{subtitle}</span>
-        </div>
-      </div>
+      <ChevronRight className="h-5 w-5 text-slate-400" />
     </div>
   )
 }

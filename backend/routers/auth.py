@@ -121,3 +121,23 @@ def get_coin_history(current_user: User = Depends(get_current_user), db: Session
         }
         for h in histories
     ]
+
+
+@router.post("/update-coins")
+def update_coins(amount: int, title: str = "Quiz Reward", current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update koin user setelah quiz"""
+    # Update user coins
+    current_user.coins += amount
+    db.commit()
+    
+    # Add coin history
+    coin_history = CoinHistory(
+        user_id=current_user.id,
+        title=title,
+        amount=amount,
+        type="income"
+    )
+    db.add(coin_history)
+    db.commit()
+    
+    return {"success": True, "coins": current_user.coins, "earned": amount}

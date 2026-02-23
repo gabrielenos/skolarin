@@ -35,3 +35,10 @@ def decode_token(token: str) -> dict | None:
     return payload
   except JWTError:
     return None
+
+
+def get_current_user(token: str = None) -> dict | None:
+  """Decode token dan return user data"""
+  if not token:
+    return None
+  return decode_token(token)

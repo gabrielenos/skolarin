@@ -115,9 +115,27 @@ export default function GuessTheWordPage() {
 
         <section className="flex flex-col items-center gap-8">
           <div className="grid gap-6 lg:grid-cols-3">
-            <GTWCategoryCard title="English" subtitle="Sub Category: 30" />
-            <GTWCategoryCard title="indonesia language" subtitle="Sub Category: 30" />
-            <GTWCategoryCard title="mathematics" subtitle="Sub Category: 30" />
+            <button
+              type="button"
+              onClick={() => router.push("/guess_the_word/english")}
+              className="focus:outline-none cursor-pointer"
+            >
+              <GTWCategoryCard title="English" subtitle="Sub Category: 30" />
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/guess_the_word/indonesia_language")}
+              className="focus:outline-none cursor-pointer"
+            >
+              <GTWCategoryCard title="Indonesia Language" subtitle="Sub Category: 30" />
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/guess_the_word/mathematics")}
+              className="focus:outline-none cursor-pointer"
+            >
+              <GTWCategoryCard title="Mathematics" subtitle="Sub Category: 30" />
+            </button>
           </div>
         </section>
       </main>

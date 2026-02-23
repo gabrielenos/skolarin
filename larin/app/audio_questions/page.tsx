@@ -110,7 +110,13 @@ export default function AudioQuestionsPage() {
         </header>
 
         <section className="flex flex-col items-center">
-          <AudioQuestionsCard title="audio questions" subtitle="Sub Category: 1" />
+          <button
+            type="button"
+            onClick={() => router.push("/audio_questions/quiz_audio")}
+            className="focus:outline-none cursor-pointer"
+          >
+            <AudioQuestionsCard title="audio questions" subtitle="Sub Category: 1" />
+          </button>
         </section>
       </main>
 
@@ -166,7 +172,7 @@ interface AudioQuestionsCardProps {
 
 function AudioQuestionsCard({ title, subtitle }: AudioQuestionsCardProps) {
   return (
-    <div className="flex h-[150px] w-full max-w-[420px] items-center rounded-[12px] border border-black/70 bg-[#1450A3] px-6 py-4 text-left text-white shadow-md">
+    <div className="flex h-[150px] w-[400px] items-center rounded-[12px] border border-black/70 bg-[#1450A3] px-6 py-4 text-left text-white shadow-md">
       <div className="mr-4 flex flex-col items-center gap-2 flex-shrink-0">
         <div className="relative h-[81px] w-[81px]">
           <img src="/images/book.png" alt="Category icon" className="h-full w-full object-contain" />

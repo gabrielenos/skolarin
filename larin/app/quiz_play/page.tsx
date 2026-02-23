@@ -151,10 +151,14 @@ export default function QuizPlayPage() {
             <button type="button" onClick={() => router.push("/group_battle")} className="focus:outline-none">
               <QuizPlayTextCard title="Group Battle" description="It's a group quiz battle" />
             </button>
-            <QuizPlayTextCard title="Math Mania" description="Challenge Your Mind" />
+            <button type="button" onClick={() => router.push("/math_mania")} className="focus:outline-none">
+              <QuizPlayTextCard title="Math Mania" description="Challenge Your Mind" />
+            </button>
 
             {/* Baris 6 */}
-            <QuizPlayTextCard title="Exam" description="Boost your knowledge" />
+            <button type="button" onClick={() => router.push("/exam")} className="focus:outline-none">
+              <QuizPlayTextCard title="Exam" description="Boost your knowledge" />
+            </button>
             <button type="button" onClick={() => router.push("/multimatch")} className="focus:outline-none">
               <QuizPlayTextCard title="Multi Math" description="Multi select question" />
             </button>
@@ -235,8 +239,12 @@ export default function QuizPlayPage() {
             <button type="button" onClick={() => router.push("/audio_questions")} className="focus:outline-none">
               <QuizPlayTextCard title="Audio Questions" description="Select your favorite zone to play" />
             </button>
-            <QuizPlayTextCard title="Math Mania" description="Challenge Your Mind" />
-            <QuizPlayTextCard title="Exam" description="Boost your knowledge" />
+            <button type="button" onClick={() => router.push("/math_mania")} className="focus:outline-none">
+              <QuizPlayTextCard title="Math Mania" description="Challenge Your Mind" />
+            </button>
+            <button type="button" onClick={() => router.push("/exam")} className="focus:outline-none">
+              <QuizPlayTextCard title="Exam" description="Boost your knowledge" />
+            </button>
             <button type="button" onClick={() => router.push("/multimatch")} className="focus:outline-none">
               <QuizPlayTextCard title="Multi Math" description="Multi select question" />
             </button>

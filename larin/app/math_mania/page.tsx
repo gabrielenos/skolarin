@@ -114,10 +114,10 @@ export default function MathManiaPage() {
         </header>
 
         <section className="flex flex-col items-center gap-8">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <MathManiaCard title="English" subtitle="Sub Category: 30" />
-            <MathManiaCard title="Indonesian Language" subtitle="Sub Category: 30" />
-            <MathManiaCard title="mathematics" subtitle="Sub Category: 30" />
+          <div className="flex justify-center">
+            <button type="button" onClick={() => router.push("/math_mania/mathematics")} className="focus:outline-none">
+              <MathManiaCard title="mathematics" subtitle="Sub Category: 30" />
+            </button>
           </div>
         </section>
       </main>

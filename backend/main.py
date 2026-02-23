@@ -7,7 +7,9 @@ from database import Base, engine, DATABASE_URL
 import stats  # Import ini mendaftarkan UserStats ke SQLAlchemy
 import quiz  # Import ini mendaftarkan QuizAttempt ke SQLAlchemy
 from routers.auth import router as auth_router
-from routers.quiz import router as quiz_router
+from routers.quiz_mathematics import router as math_router
+from routers.quiz_english import router as english_router
+from routers.quiz_indonesia import router as indonesia_router
 
 
 def create_database_if_not_exists():
@@ -51,4 +53,6 @@ def root():
 
 
 app.include_router(auth_router)
-app.include_router(quiz_router)
+app.include_router(math_router)
+app.include_router(english_router)
+app.include_router(indonesia_router)
