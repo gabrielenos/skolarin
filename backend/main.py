@@ -10,6 +10,8 @@ from routers.auth import router as auth_router
 from routers.quiz_mathematics import router as math_router
 from routers.quiz_english import router as english_router
 from routers.quiz_indonesia import router as indonesia_router
+from routers.quiz_zone import router as quiz_zone_router
+from data.quiz import router as daily_quiz_router
 
 
 def create_database_if_not_exists():
@@ -56,3 +58,5 @@ app.include_router(auth_router)
 app.include_router(math_router)
 app.include_router(english_router)
 app.include_router(indonesia_router)
+app.include_router(quiz_zone_router)
+app.include_router(daily_quiz_router)

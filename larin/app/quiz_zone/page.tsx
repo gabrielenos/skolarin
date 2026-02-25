@@ -115,20 +115,27 @@ export default function QuizZonePage() {
         {/* Grid kategori Quiz Zone */}
         <section className="flex flex-col items-center gap-8">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* General Knowledge: klik untuk ke halaman general-knowledge */}
             <button
               type="button"
-              onClick={() => router.push("/quiz_zone/general-knowledge")}
+              onClick={() => router.push("/quiz_zone/multiple_choice")}
               className="focus:outline-none"
             >
-              <ZoneCard title="General Knowledge" subtitle="Sub-Categories: 3" questions="Questions: 234" />
+              <ZoneCard title="Multiple Choice" subtitle="Sub Kategori: 3" questions="Questions: 234" />
             </button>
-            <ZoneCard title="Sports" subtitle="Sub-Categories: 3" questions="QuizBizz: 123" />
-            <ZoneCard title="News" subtitle="Sub-Categories: 3" questions="Questions: 101" />
-            <ZoneCard title="Music" subtitle="Sub-Categories: 3" questions="Questions: 57" />
-            <ZoneCard title="History" subtitle="Sub-Categories: 3" questions="Questions: 200" />
-            <ZoneCard title="Science 120" subtitle="Sub-Categories: 3" questions="Questions: 150" />
-            <ZoneCard title="Movies" subtitle="Sub-Categories: 3" questions="Questions: 400" />
+            <button
+              type="button"
+              onClick={() => router.push("/quiz_zone/true-talse_statements")}
+              className="focus:outline-none"
+            >
+              <ZoneCard title="True-False Statements" subtitle="Sub Kategori: 3" questions="Questions: 101" />
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/quiz_zone/self_challenge")}
+              className="focus:outline-none"
+            >
+              <ZoneCard title="Self Challenge" subtitle="Sub Kategori: 3" questions="Questions: 57" />
+            </button>
           </div>
         </section>
       </main>
@@ -190,14 +197,14 @@ interface ZoneCardProps {
 function ZoneCard({ title, subtitle, questions }: ZoneCardProps) {
   return (
     <div className="flex h-[150px] w-[400px] items-center rounded-[12px] border border-black/70 bg-[#1450A3] px-6 py-4 text-left text-white shadow-md">
-      {/* Kolom kiri: ikon buku (mobile & desktop) */}
+    
       <div className="mr-4 flex-shrink-0 flex items-center md:block">
-        {/* Mobile & desktop: ikon kategori utama (buku) */}
+      
         <div className="relative h-[60px] w-[60px] md:h-[81px] md:w-[81px]">
           <NextImage src="/images/book.png" alt="Category icon" fill className="object-contain" />
         </div>
 
-        {/* Desktop: Questions + bell di bawah buku */}
+     
         <div className="hidden md:flex mt-1 items-center gap-2">
           <p className="text-xs text-sky-100/90 whitespace-nowrap">{questions}</p>
           <div className="h-[32px] w-[32px] rounded-full bg-[#FFC727] flex items-center justify-center">
@@ -208,18 +215,17 @@ function ZoneCard({ title, subtitle, questions }: ZoneCardProps) {
         </div>
       </div>
 
-      {/* Kolom tengah: teks utama */}
       <div className="flex flex-col justify-center flex-1">
         <h3
           className="w-[72px] h-[30px] font-[Poppins] font-bold text-[20px] leading-[20px] tracking-[-0.01em] whitespace-nowrap align-middle"
         >
           {title}
         </h3>
-        {/* Subtitle dengan lebar & tinggi mendekati 117x20 px */}
+ 
         <p className="mt-1 h-[20px] w-[117px] text-xs leading-[20px] text-sky-100/90">{subtitle}</p>
       </div>
 
-      {/* Kolom kanan (mobile saja): bell di atas, Questions di bawah, sejajar kanan */}
+  
       <div className="ml-4 flex-shrink-0 md:hidden">
         <div className="flex flex-col items-end gap-1">
           <div className="h-[32px] w-[32px] rounded-full bg-[#FFC727] flex items-center justify-center">

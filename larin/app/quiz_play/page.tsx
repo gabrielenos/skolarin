@@ -127,7 +127,7 @@ export default function QuizPlayPage() {
             </button>
 
             {/* Baris 2 */}
-            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/true_false") }} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); setTimeout(() => router.push("/true_false"), 0) }} className="focus:outline-none">
               <QuizPlayTextCard title="True & False" description="Choose your answers" />
             </button>
             <button type="button" onClick={() => router.push("/fun_learn")} className="focus:outline-none">
@@ -199,7 +199,7 @@ export default function QuizPlayPage() {
                 description="Daily basic new quiz game"
               />
             </button>
-            <button type="button" onClick={() => { markNavigationAsValid(); router.push("/true_false") }} className="focus:outline-none">
+            <button type="button" onClick={() => { markNavigationAsValid(); setTimeout(() => router.push("/true_false"), 0) }} className="focus:outline-none">
               <QuizPlayCard
                 imageSrc="/images/true.png"
                 imageAlt="True & False"
