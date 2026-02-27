@@ -1,10 +1,19 @@
 """
-Router untuk Mathematics Guess The Word Quiz (Word Scramble)
+Router untuk Math Mania Quiz - Multiple Choice (dari quiz3.py)
 """
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import Optional, Literal
-from data.mathematics_scramble import MATHEMATICS_QUESTIONS
+from typing import List
+import random
+
+# Import soal Matematika dari quiz3.py
+try:
+    from data.quiz3 import MATH_QUESTIONS
+except ImportError:
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from quiz3 import MATH_QUESTIONS
 
 router = APIRouter(prefix="/quiz/mathematics", tags=["mathematics"])
 
@@ -15,23 +24,23 @@ TOTAL_LEVELS = 30
 class Question(BaseModel):
     id: int
     type: str
-    sentence: str
-    scrambledLetters: list[str]
-    hint: str
+    question: str
+    options: List[str]
+    correctAnswer: int
 
 class AnswerRequest(BaseModel):
     question_id: int
-    answer: str
+    answer: int
 
 class CheckAnswerResponse(BaseModel):
     correct: bool
-    correct_answer: str
+    correct_answer: int
     message: str
 
 @router.get("/questions")
 def get_questions(level: int = Query(1, ge=1, le=TOTAL_LEVELS)):
-    """Mengambil 10 soal untuk level tertentu (dari 50 soal yang di-recycle)"""
-    total_unique_questions = len(MATHEMATICS_QUESTIONS)  # 50 soal
+    """Mengambil 10 soal matematika untuk level tertentu (dari 30 soal yang di-recycle)"""
+    total_unique_questions = len(MATH_QUESTIONS)  # 30 soal
     
     # Hitung posisi awal dengan modulo untuk recycle
     start_index = ((level - 1) * QUESTIONS_PER_LEVEL) % total_unique_questions
@@ -40,44 +49,39 @@ def get_questions(level: int = Query(1, ge=1, le=TOTAL_LEVELS)):
     level_questions = []
     for i in range(QUESTIONS_PER_LEVEL):
         index = (start_index + i) % total_unique_questions
-        level_questions.append(MATHEMATICS_QUESTIONS[index])
-    
-    # Return soal dengan correctAnswer di-hidden untuk frontend
-    questions_for_response = []
-    for q in level_questions:
-        question_copy = {
+        q = MATH_QUESTIONS[index]
+        # Transform ke format yang frontend expect
+        level_questions.append({
             "id": q["id"],
-            "type": q["type"],
-            "sentence": q["sentence"],
-            "scrambledLetters": q["scrambledLetters"],
-            "hint": q["hint"]
-        }
-        questions_for_response.append(question_copy)
+            "type": "multiple_choice",
+            "question": q["question"],
+            "options": q["options"],
+            "correctAnswer": q["correct_answer"]
+        })
+    
+    # Acak soal untuk variasi
+    rng = random.Random()
+    rng.shuffle(level_questions)
     
     return {
         "level": level,
-        "total_questions": len(questions_for_response),
-        "questions": questions_for_response
+        "total_questions": len(level_questions),
+        "questions": level_questions
     }
 
 @router.post("/check-answer", response_model=CheckAnswerResponse)
 def check_answer(request: AnswerRequest):
     """Memeriksa jawaban user"""
-    # Cari soal berdasarkan ID
-    question = None
-    for q in MATHEMATICS_QUESTIONS:
-        if q["id"] == request.question_id:
-            question = q
-            break
+    question = next((q for q in MATH_QUESTIONS if q["id"] == request.question_id), None)
     
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     
-    is_correct = request.answer.upper() == question["correctAnswer"].upper()
+    is_correct = request.answer == question["correct_answer"]
     
     return CheckAnswerResponse(
         correct=is_correct,
-        correct_answer=question["correctAnswer"],
+        correct_answer=question["correct_answer"],
         message="Benar!" if is_correct else "Salah!"
     )
 
@@ -87,5 +91,5 @@ def get_total_levels():
     return {
         "total_levels": TOTAL_LEVELS,
         "questions_per_level": QUESTIONS_PER_LEVEL,
-        "total_questions": len(MATHEMATICS_QUESTIONS)
+        "total_questions": len(MATH_QUESTIONS)
     }

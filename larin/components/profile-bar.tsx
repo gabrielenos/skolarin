@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { BarChart3, DollarSign, Star } from "lucide-react"
+import RiwayatKoin from "./riwayat-koin"
+import TukarKoin from "./tukar-koin"
 
 interface User {
   id: number
@@ -17,6 +19,8 @@ export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
   const router = useRouter()
   const [isProfileCollapsed, setIsProfileCollapsed] = useState(false)
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false)
+  const [isRiwayatKoinOpen, setIsRiwayatKoinOpen] = useState(false)
+  const [isTukarKoinOpen, setIsTukarKoinOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
@@ -183,7 +187,13 @@ export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
                     </div>
                   </div>
 
-                  <div className="text-left">
+                  <div 
+                    className="text-left cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => {
+                      setIsProfileCardOpen(false)
+                      setIsTukarKoinOpen(true)
+                    }}
+                  >
                     <div className="text-xs tracking-wider text-white/80">KOIN</div>
                     <div className="mt-1 flex items-center gap-2">
                       <DollarSign className="h-6 w-6" />
@@ -196,6 +206,15 @@ export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
           </div>
         </div>
       )}
+      <RiwayatKoin 
+        isOpen={isRiwayatKoinOpen} 
+        onClose={() => setIsRiwayatKoinOpen(false)} 
+      />
+      <TukarKoin 
+        isOpen={isTukarKoinOpen} 
+        onClose={() => setIsTukarKoinOpen(false)}
+        totalCoins={user?.coins ?? 200}
+      />
     </>
   )
 }

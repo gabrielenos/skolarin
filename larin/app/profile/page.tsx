@@ -19,12 +19,15 @@ import {
   UserPlus,
   Wallet,
 } from "lucide-react"
+import TukarKoin from "@/components/tukar-koin"
+import RiwayatKoin from "@/components/riwayat-koin"
 
 interface User {
   id: number
   email: string
   username: string | null
   avatar_url: string | null
+  coins?: number
 }
 
 export default function ProfilePage() {
@@ -32,6 +35,8 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showWallet, setShowWallet] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -144,14 +149,14 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <button type="button" onClick={() => router.push("/profile/wallet")} className="rounded-2xl bg-white p-6 shadow-sm">
+          <button type="button" onClick={() => setShowWallet(true)} className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
               <Wallet className="h-7 w-7 text-[#1F7AE0]" />
             </div>
             <div className="mt-4 text-center text-sm font-semibold text-slate-800">Wallet</div>
           </button>
 
-          <button type="button" onClick={() => router.push("/profile/history")} className="rounded-2xl bg-white p-6 shadow-sm">
+          <button type="button" onClick={() => setShowHistory(true)} className="rounded-2xl bg-white p-6 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
               <Coins className="h-7 w-7 text-[#1F7AE0]" />
             </div>
@@ -195,7 +200,7 @@ export default function ProfilePage() {
             onClick={() => {
               window.localStorage.removeItem("skolarin_auth_token")
               document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-              router.push("/dashboard/login")
+              router.push("/dashboard")
             }}
             className="md:col-span-3 flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm"
           >
@@ -213,6 +218,17 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+      {/* Wallet Modal - TukarKoin */}
+      <TukarKoin
+        isOpen={showWallet}
+        onClose={() => setShowWallet(false)}
+        totalCoins={user?.coins ?? 200}
+      />
+      {/* History Modal - RiwayatKoin */}
+      <RiwayatKoin
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+      />
     </div>
   )
 }
