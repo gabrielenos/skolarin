@@ -15,7 +15,12 @@ interface User {
   coins: number
 }
 
-export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
+interface ProfileBarProps {
+  isDarkMode: boolean
+  onLoginRequired?: () => void
+}
+
+export default function ProfileBar({ isDarkMode, onLoginRequired }: ProfileBarProps) {
   const router = useRouter()
   const [isProfileCollapsed, setIsProfileCollapsed] = useState(false)
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false)
@@ -35,13 +40,27 @@ export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
         if (res.ok) {
           const data = await res.json()
           setUser(data)
+        } else if (res.status === 401) {
+          // Token invalid or expired - clear auth and redirect
+          window.localStorage.removeItem("skolarin_auth_token")
+          document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+          window.dispatchEvent(new Event("skolarin-logout"))
+          router.push("/dashboard/login")
         }
       } catch (err) {
         console.error("Failed to fetch user:", err)
       }
     }
     fetchUser()
-  }, [])
+
+    // Listen for logout event from other tabs
+    const onLogout = () => {
+      setUser(null)
+      router.push("/dashboard/login")
+    }
+    window.addEventListener("skolarin-logout", onLogout)
+    return () => window.removeEventListener("skolarin-logout", onLogout)
+  }, [router])
 
   useEffect(() => {
     let rafId: number | null = null
@@ -145,7 +164,11 @@ export default function ProfileBar({ isDarkMode }: { isDarkMode: boolean }) {
                   type="button"
                   onClick={() => {
                     setIsProfileCardOpen(false)
-                    router.push("/profile")
+                    if (!user && onLoginRequired) {
+                      onLoginRequired()
+                    } else {
+                      router.push("/profile")
+                    }
                   }}
                   className="flex items-center gap-3 text-left"
                 >

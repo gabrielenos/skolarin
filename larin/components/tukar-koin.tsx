@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronLeft, Coins } from "lucide-react"
+import Logo from "@/components/logo"
 
 interface TukarKoinProps {
   isOpen: boolean
@@ -15,12 +17,75 @@ const MINIMUM_REDEEMABLE_COINS = 100
 const MINIMUM_REDEEMABLE_DOLLARS = 10.0
 
 export default function TukarKoin({ isOpen, onClose, totalCoins = 200 }: TukarKoinProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<"permintaan" | "transaksi">("permintaan")
   const [redeemAmount, setRedeemAmount] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = window.localStorage.getItem("skolarin_auth_token")
+    setIsLoggedIn(!!token)
+  }, [])
 
   const redeemableDollars = (totalCoins * COIN_TO_DOLLAR_RATE).toFixed(1)
 
   if (!isOpen) return null
+
+  // Login prompt for non-logged in users
+  if (!isLoggedIn) {
+    return (
+      <div className="fixed inset-0 z-[70]">
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+
+        {/* Login Prompt Modal */}
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-xl">
+            {/* Mascot */}
+            <div className="mb-4 flex justify-center">
+              <Logo width={120} height={120} />
+            </div>
+
+            <p className="text-slate-700 mb-8 leading-relaxed">
+              Oops! Kamu belum bisa mengakses fitur ini.Silakan login terlebih dahulu untuk menikmati semua fitur.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={onClose}
+                className="w-full py-3 px-4 rounded-full border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
+              >
+                Kembali
+              </button>
+
+              <button
+                onClick={() => {
+                  onClose()
+                  router.push("/dashboard/login")
+                }}
+                className="w-full py-3 px-4 rounded-full bg-[#0B74E8] text-white font-semibold hover:bg-[#095FC0] transition-colors"
+              >
+                Login Sekarang
+              </button>
+            </div>
+
+            <p className="mt-6 text-slate-500 text-sm">
+              Belum punya akun?{" "}
+              <button
+                onClick={() => {
+                  onClose()
+                  router.push("/dashboard/signup")
+                }}
+                className="text-[#0B74E8] font-semibold hover:underline"
+              >
+                Daftar
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[70]">

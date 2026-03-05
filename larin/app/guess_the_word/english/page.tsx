@@ -117,7 +117,7 @@ export default function EnglishPage() {
             <button
               key={level.id}
               type="button"
-              onClick={() => router.push(`/guess_the_word/quiz?level=${level.id}`)}
+              onClick={() => router.push(`/guess_the_word/quiz?level=${level.id}&category=English`)}
               className="focus:outline-none w-full md:w-[280px] lg:w-[320px] cursor-pointer"
             >
               <EnglishCard title={level.title} questions={level.questions} />

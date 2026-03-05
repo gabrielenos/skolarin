@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Settings, Trophy, ChevronRight } from "lucide-react"
+import { Settings, Trophy, ChevronRight, ChevronDown, Lock, LockOpen } from "lucide-react"
 import Logo from "@/components/logo"
 import ProfileBar from "@/components/profile-bar"
 import SettingsMenu from "@/components/settings-menu"
@@ -10,6 +10,7 @@ import SettingsMenu from "@/components/settings-menu"
 export default function MultimatchMathematicsPage() {
   const router = useRouter()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [expandedCard, setExpandedCard] = useState<number | null>(null)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window === "undefined") return false
     return window.localStorage.getItem("skolarin-theme") === "dark"
@@ -18,10 +19,12 @@ export default function MultimatchMathematicsPage() {
   const pageBgClass = isDarkMode ? "bg-slate-100" : "bg-[#F0F4F8]"
   const navBgClass = "bg-[#29579F]"
 
+  // Mathematics-1: 1 level, Mathematics-2 to Mathematics-30: 3 levels each
   const multimatchLevels = Array.from({ length: 30 }, (_, i) => ({
     id: i + 1,
     title: `Mathematics ${i + 1}`,
     questions: 30,
+    levelCount: i === 0 ? 1 : 3, // First card has 1 level, others have 3
   }))
 
   useLayoutEffect(() => {
@@ -55,6 +58,10 @@ export default function MultimatchMathematicsPage() {
       document.removeEventListener("visibilitychange", onVisibilityChange)
     }
   }, [])
+
+  const toggleCard = (cardId: number) => {
+    setExpandedCard(expandedCard === cardId ? null : cardId)
+  }
 
   return (
     <div suppressHydrationWarning className={`min-h-screen flex flex-col ${pageBgClass}`}>
@@ -114,14 +121,55 @@ export default function MultimatchMathematicsPage() {
 
         <section className="grid grid-cols-2 gap-3 max-w-[900px] mx-auto px-4 md:flex md:flex-col md:flex-wrap md:content-center md:max-h-[750px]">
           {multimatchLevels.map((level) => (
-            <button
-              key={level.id}
-              type="button"
-              onClick={() => router.push(`/multimatch/multimatch_mathematics/quiz?level=${level.id}`)}
-              className="focus:outline-none w-full md:w-[280px] lg:w-[320px] cursor-pointer"
-            >
-              <MultimatchMathematicsCard title={level.title} questions={level.questions} />
-            </button>
+            <div key={level.id} className="w-full md:w-[280px] lg:w-[320px]">
+              <button
+                type="button"
+                onClick={() => toggleCard(level.id)}
+                className="focus:outline-none w-full cursor-pointer"
+              >
+                <MultimatchMathematicsCard 
+                  title={level.title} 
+                  questions={level.questions}
+                  isExpanded={expandedCard === level.id}
+                />
+              </button>
+              
+              {/* Expanded Level List */}
+              {expandedCard === level.id && (
+                <div className="mt-2 bg-white rounded-lg border border-slate-200 shadow-sm p-3">
+                  <div className={`grid gap-2 ${level.levelCount === 1 ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                    {Array.from({ length: level.levelCount }, (_, i) => {
+                      // Level numbers are local to each card: 1, 2, 3
+                      const levelNum = i + 1
+                      const isLocked = levelNum > 1
+                      return (
+                        <button
+                          key={levelNum}
+                          type="button"
+                          onClick={() =>
+                            !isLocked &&
+                            router.push(`/multimatch/multimatch_mathematics/quiz?level=${levelNum}`)
+                          }
+                          disabled={isLocked}
+                          className={`flex items-center justify-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                            isLocked
+                              ? "bg-slate-100 text-slate-500 cursor-not-allowed"
+                              : "bg-[#F0F4F8] text-slate-700 hover:bg-[#E5EBF2] cursor-pointer"
+                          }`}
+                        >
+                          <span>Level {levelNum}</span>
+                          {isLocked ? (
+                            <Lock className="h-3 w-3 text-slate-400" />
+                          ) : (
+                            <LockOpen className="h-3 w-3 text-green-500" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </section>
       </main>
@@ -171,7 +219,15 @@ export default function MultimatchMathematicsPage() {
   )
 }
 
-function MultimatchMathematicsCard({ title, questions }: { title: string; questions: number }) {
+function MultimatchMathematicsCard({ 
+  title, 
+  questions, 
+  isExpanded 
+}: { 
+  title: string; 
+  questions: number;
+  isExpanded?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3">
@@ -183,7 +239,11 @@ function MultimatchMathematicsCard({ title, questions }: { title: string; questi
           <p className="text-xs text-slate-500">Pertanyaan: {questions}</p>
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 text-slate-400" />
+      {isExpanded ? (
+        <ChevronDown className="h-5 w-5 text-slate-400" />
+      ) : (
+        <ChevronRight className="h-5 w-5 text-slate-400" />
+      )}
     </div>
   )
 }

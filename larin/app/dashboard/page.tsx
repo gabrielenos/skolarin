@@ -156,7 +156,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <ProfileBar isDarkMode={isDarkMode} />
+      <ProfileBar isDarkMode={isDarkMode} onLoginRequired={() => setIsLoginModalOpen(true)} />
 
       {/* Konten utama */}
       <main className="flex-1 mx-auto w-full max-w-6xl px-4 pt-10 pb-24 sm:px-6 lg:px-8">

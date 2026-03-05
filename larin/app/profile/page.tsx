@@ -19,8 +19,9 @@ import {
   UserPlus,
   Wallet,
 } from "lucide-react"
-import TukarKoin from "@/components/tukar-koin"
-import RiwayatKoin from "@/components/riwayat-koin"
+import TukarKoinPage from "@/components/tukar-koin-page"
+import RiwayatKoinPage from "@/components/riwayat-koin-page"
+import Logo from "@/components/logo"
 
 interface User {
   id: number
@@ -37,10 +38,27 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [showWallet, setShowWallet] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = window.localStorage.getItem("skolarin_auth_token")
+    if (!token) {
+      setLoading(false)
+      setIsLoggedIn(false)
+      return
+    }
+    setIsLoggedIn(true)
+  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
       const token = window.localStorage.getItem("skolarin_auth_token")
+      
+      // Skip fetching if no token
+      if (!token) {
+        setLoading(false)
+        return
+      }
       
       try {
         const res = await fetch("http://127.0.0.1:8000/auth/me", {
@@ -51,9 +69,10 @@ export default function ProfilePage() {
 
         if (!res.ok) {
           if (res.status === 401) {
+            // Clear invalid token but don't redirect - let the page show login prompt
             window.localStorage.removeItem("skolarin_auth_token")
             document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-            router.push("/dashboard/login")
+            setLoading(false)
             return
           }
           throw new Error("Failed to fetch user data")
@@ -88,7 +107,8 @@ export default function ProfilePage() {
     { label: "Rate Us", icon: Star },
   ] as const
 
-  if (loading) {
+  // Show loading while checking auth or redirecting
+  if (loading || !isLoggedIn) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-slate-500">Loading...</div>
@@ -101,6 +121,23 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-red-500">{error || "User not found"}</div>
       </div>
+    )
+  }
+
+  if (showWallet) {
+    return (
+      <TukarKoinPage
+        onBack={() => setShowWallet(false)}
+        totalCoins={user?.coins ?? 200}
+      />
+    )
+  }
+
+  if (showHistory) {
+    return (
+      <RiwayatKoinPage
+        onBack={() => setShowHistory(false)}
+      />
     )
   }
 
@@ -200,6 +237,7 @@ export default function ProfilePage() {
             onClick={() => {
               window.localStorage.removeItem("skolarin_auth_token")
               document.cookie = "skolarin_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+              window.dispatchEvent(new Event("skolarin-logout"))
               router.push("/dashboard")
             }}
             className="md:col-span-3 flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-sm"
@@ -218,17 +256,6 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-      {/* Wallet Modal - TukarKoin */}
-      <TukarKoin
-        isOpen={showWallet}
-        onClose={() => setShowWallet(false)}
-        totalCoins={user?.coins ?? 200}
-      />
-      {/* History Modal - RiwayatKoin */}
-      <RiwayatKoin
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-      />
     </div>
   )
 }

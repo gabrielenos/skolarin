@@ -34,15 +34,12 @@ export default function LoadingScreen({
         isFading ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* Background decorative circles */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/4 -right-1/4 h-[600px] w-[600px] animate-pulse rounded-full bg-white/10" />
         <div className="absolute -bottom-1/4 -left-1/4 h-[400px] w-[400px] animate-pulse rounded-full bg-white/10 [animation-delay:0.5s]" />
       </div>
 
-      {/* Logo and text */}
       <div className="relative flex flex-col items-center gap-4">
-        {/* Logo */}
         <div className="animate-bounce">
           <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-2xl">
             <svg width="48" height="48" viewBox="0 0 61 68" fill="none" className="text-[#0B74E8]">
@@ -52,17 +49,14 @@ export default function LoadingScreen({
               />
             </svg>
             
-            {/* Glow effect */}
             <div className="absolute inset-0 -z-10 rounded-2xl bg-white/30 blur-xl" />
           </div>
         </div>
 
-        {/* Text */}
         <h1 className="animate-fade-in-up text-3xl font-bold text-white tracking-wide">
           Skolarin
         </h1>
 
-        {/* Loading dots */}
         <div className="mt-4 flex gap-2">
           {[0, 1, 2].map((i) => (
             <div
